@@ -2,6 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import StandardScaler
+from sklearn.manifold import TSNE
+import numpy as np
 
 df = pd.read_csv("Stars.csv")
 
@@ -79,6 +81,8 @@ sns.boxplot(data=df, x=df['Type'], y=df['A_M'])
 #Set A_M (Manitude) and Spectral_Class to numerical values
 for col in df.columns:
   df[col]=df[col].astype('category').cat.codes
+
+"""
 #PCA
 #Separating target and results
 x=df.loc[:,df.columns != 'Type']
@@ -105,10 +109,31 @@ for target, color in zip(targets,colors):
     ax.scatter(finalDf.loc[indicesToKeep, 'principal component 2'], finalDf.loc[indicesToKeep, 'principal component 1'], c = color, s = 50)
 ax.legend(targets)
 plt.show()
-
-#Importance of each features?????????
-
+#TODO Importance of each features
+"""
 
 #TSNE
+x_tsne=df.loc[:,df.columns != 'Type']
+y_tsne=df.loc[:,['Type']]
+
+tsne = TSNE()
+X_embedded = tsne.fit_transform(x_tsne)
+
+#data = {'tsne-2d-one':X_embedded[:,0],'tsne-2d-two':X_embedded[:,1],'y':y_tsne}
+#df_subset = pd.DataFrame(data)
+
+df_subset = pd.DataFrame(columns=['tsne-2d-one','tsne-2d-two','y'])
+df_subset['tsne-2d-one']=X_embedded[:,0]
+df_subset['tsne-2d-two']=X_embedded[:,1]
+df_subset['y']=y_tsne
 
 
+plt.figure(figsize=(16,10))
+sns.scatterplot(
+    x="tsne-2d-two", y="tsne-2d-one",
+    hue=df_subset.y.tolist(),
+    palette=sns.color_palette("hls", 6),
+    data=df_subset,
+    legend="full",
+)
+plt.show()
